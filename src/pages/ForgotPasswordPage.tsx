@@ -5,12 +5,24 @@ export const ForgotPasswordPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isSent, setIsSent] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate sending email
-        setTimeout(() => {
+        setIsLoading(true);
+        try {
+            // Call API
+            await fetch('/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
             setIsSent(true);
-        }, 1000);
+        } catch (error) {
+            alert('Gagal mengirim email. Pastikan email benar atau coba lagi nanti.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,9 +54,10 @@ export const ForgotPasswordPage: React.FC = () => {
                             <div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#EE4D2D] hover:bg-[#D73211] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EE4D2D]"
+                                    disabled={isLoading}
+                                    className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#EE4D2D] hover:bg-[#D73211] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#EE4D2D] disabled:opacity-70"
                                 >
-                                    KIRIM RESET LINK
+                                    {isLoading ? 'MENGIRIM...' : 'KIRIM RESET LINK'}
                                 </button>
                             </div>
                         </form>

@@ -64,3 +64,38 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+import { sendEmail } from '../services/emailService';
+
+export const forgotPassword = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        const user = await UserModel.findByEmail(email);
+
+        if (!user) {
+            // Security: Don't reveal if user exists
+            res.status(200).json({ message: 'If email exists, reset link sent.' });
+            return;
+        }
+
+        // Generate temporary token (in real app, save to DB with expiry)
+        const resetToken = jwt.sign({ id: user.id, type: 'reset' }, JWT_SECRET, { expiresIn: '15m' });
+        const resetLink = `https://gmk-logistics.vercel.app/reset-password?token=${resetToken}`;
+
+        const emailContent = `
+            <h3>Permintaan Reset Password - GMK Logistics</h3>
+            <p>Halo ${user.name},</p>
+            <p>Kami menerima permintaan untuk mereset password akun Anda.</p>
+            <p>Silakan klik link di bawah ini untuk membuat password baru:</p>
+            <a href="${resetLink}" style="background:#EE4D2D; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Reset Password</a>
+            <p>Link ini berlaku selama 15 menit.</p>
+            <p>Jika Anda tidak merasa meminta ini, abaikan saja email ini.</p>
+        `;
+
+        await sendEmail(email, 'Reset Password GMK', emailContent);
+
+        res.json({ message: 'If email exists, reset link sent.' });
+    } catch (err: any) {
+        res.status(500).json({ message: err.message });
+    }
+};
