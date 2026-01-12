@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { User, Transaction, AuditLog } from '../types';
 
-const API_URL = 'http://localhost:3000';
+// In production (Vercel), use relative path so it hits the same domain (handled by vercel.json rewrites)
+// In development, use localhost:3000
+const API_URL = import.meta.env.PROD ? '' : 'http://localhost:3000';
 
 const api = axios.create({
     baseURL: API_URL,
