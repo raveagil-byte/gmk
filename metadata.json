@@ -1,0 +1,7 @@
+{
+  "name": "KurirTrack - Logistik & Keuangan",
+  "description": "Aplikasi mobile untuk pencatatan transaksi kurir dengan perhitungan otomatis fixed-price, sistem RBAC (Admin, Supervisor, Kurir), dan dashboard analitik mendalam.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
