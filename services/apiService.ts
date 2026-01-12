@@ -85,3 +85,32 @@ export const transactionService = {
         return res.data;
     }
 };
+
+export const userService = {
+    async getAll() {
+        const res = await api.get('/api/users');
+        return res.data.data;
+    },
+
+    async create(user: Partial<User> & { password: string }) {
+        const res = await api.post('/api/users', user);
+        return res.data.data;
+    }
+};
+
+export const auditService = {
+    async getAll() {
+        const res = await api.get('/api/audit');
+        return res.data.data.map((log: any) => ({
+            ...log,
+            userId: log.user_id,
+            userName: log.user_name,
+            entityType: log.entity_type,
+            entityId: log.entity_id,
+            oldValues: log.old_values,
+            newValues: log.new_values,
+            createdAt: log.created_at,
+            ipAddress: log.ip_address
+        }));
+    }
+};

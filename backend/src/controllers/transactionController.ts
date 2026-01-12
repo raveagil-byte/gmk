@@ -67,19 +67,22 @@ export const deleteTransaction = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
 
+        if (!req.user) return res.sendStatus(401);
+        const user = req.user;
+
         // Business Rule: Only Admin can delete
-        if (req.user?.role !== 'ADMIN') {
-            res.status(403).json({ message: 'Admin only' });
+        if (user.role !== 'ADMIN') {
+            res.status(403).json({ message: 'Only Admin can delete' });
             return;
         }
 
-        const tx = await TransactionModel.softDelete(id as string);
+        const tx = await TransactionModel.softDelete(id as string, user.id);
         if (!tx) {
             res.status(404).json({ message: 'Transaction not found' });
             return;
         }
 
-        res.json({ success: true, message: 'Transaction deleted' });
+        res.json({ message: 'Transaction deleted' });
     } catch (err: any) {
         res.status(500).json({ message: err.message });
     }

@@ -1,50 +1,52 @@
-# KurirTrack - Sistem Logistik & Keuangan
+# GMK - Sistem Logistik & Keuangan Mitra Kurir
 
-Aplikasi pencatatan barang kiriman kurir dengan kalkulasi otomatis dan audit log.
+**GMK (Logistics System)** adalah aplikasi manajemen operasional yang dirancang khusus untuk mempermudah pencatatan, validasi, dan perhitungan pendapatan harian mitra kurir secara otomatis, aman, dan transparan.
 
-## Arsitektur
+Aplikasi ini menggantikan pencatatan manual (kertas/WhatsApp) dengan sistem digital terpusat yang memiliki standar keamanan audit.
 
-- **Frontend**: React + Vite (Port 5173/5174)
-- **Backend**: Node.js + Express + TypeScript (Port 3000)
-- **Database**: PostgreSQL (via `pg` driver)
+---
 
-## Cara Menjalankan
+## 🌟 Fitur Utama & Kegunaan
 
-### 1. Database
-Pastikan PostgreSQL berjalan dan database `kurirtrack` sudah dibuat.
-```sql
-CREATE DATABASE kurirtrack;
-```
-*(Schema akan dibuat otomatis saat backend start pertama kali melalui `scripts/migrate.ts`)*
+### 1. Pencatatan Manifest Digital (Paperless)
+*   **Untuk Apa?** Menggantikan laporan manual kurir yang rentan hilang atau salah hitung.
+*   **Cara Kerja:** Kurir cukup login -> Pilih "Input Manifest Baru" -> Masukkan jumlah paket.
+*   **Keunggulan:** Cepat, mudah, dan data langsung tersimpan di server pusat.
 
-### 2. Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-Server akan berjalan di `http://localhost:3000`.
-- **Admin**: admin@kurirtrack.com / admin
-- **Kurir**: andi@kurirtrack.com / password
+### 2. Kalkulasi Pendapatan Otomatis (Anti-Fraud)
+*   **Untuk Apa?** Mencegah kesalahan hitung gaji/insentif kurir.
+*   **Cara Kerja:** Sistem otomatis mengalikan jumlah paket dengan Rate Tetap (Rp 3.000/paket).
+*   **Keamanan:** Harga ini dikunci di **Backend Server**, sehingga kurir atau admin tidak bisa memanipulasi nominal "harga per paket" sembarangan.
 
-### 3. Frontend
-```bash
-# Di terminal baru
-npm install
-npm run dev
-```
-Aplikasi web akan berjalan di `http://localhost:5173`.
+### 3. Role-Based Access Control (RBAC)
+Aplikasi membagi akses berdasarkan jabatan:
+*   **Kurir**: Hanya bisa input data sendiri & lihat performa sendiri. Tidak bisa lihat data temannya (Privasi).
+*   **Supervisor**: Bisa melihat semua data kurir untuk operasional harian & melakukan Verifikasi.
+*   **Admin**: Akses penuh, termasuk manajemen user dan penghapusan data (Hapus Data = Soft Delete untuk jejak audit).
 
-## Fitur Utama
+### 4. Audit Log System (Jejak Digital)
+*   **Untuk Apa?** Kebutuhan audit internal keuangan.
+*   **Cara Kerja:** Setiap klik "Simpan", "Verifikasi", atau "Hapus" tercatat detailnya: *Siapa yang melakukan? Kapan? Data apa yang berubah?*
+*   **Hasil:** Tidak ada lagi istilah "data hilang misterius" atau "diubah diam-diam".
 
-- **Role-Based Access Control (RBAC)**: Admin, Supervisor, Kurir.
-- **Kalkulasi Otomatis**: Harga per item (Rp 3.000) dihitung di server.
-- **Audit Log**: Setiap perubahan status transaksi tercatat.
-- **Laporan**: Dashboard real-time pendapatan dan performa kurir.
+### 5. Dashboard Analitik Real-Time
+*   **Untuk Apa?** Memantau performa operasional.
+*   **Fitur:**
+    *   Grafik Tren Pengiriman 7 Hari Terakhir.
+    *   Top Performers (Ranking Kurir Terrajin).
+    *   Rekap Total Pendapatan Harian/Bulanan secara instan.
 
-## API Endpoints
+---
 
-- `POST /auth/login`
-- `GET /api/transactions`
-- `POST /api/transactions`
-- `PUT /api/transactions/:id/verify`
+## 🎯 Manfaat Bisnis
+1.  **Efisiensi Waktu:** Admin finance tidak perlu merekap ulang chat WhatsApp satu per satu.
+2.  **Transparansi:** Kurir bisa melihat estimasi pendapatannya sendiri setiap saat.
+3.  **Keamanan Data:** Mencegah kecurangan "tembak data" atau manipulasi tagihan.
+
+---
+
+## 💻 Tech Stack
+*   **Frontend**: React (Vite) + Shopee Theme UI.
+*   **Backend**: Node.js + Express.
+*   **Database**: PostgreSQL.
+*   **Security**: JWT Auth, Rate Limiting, Helmet Protection.

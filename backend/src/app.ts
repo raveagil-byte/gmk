@@ -34,8 +34,13 @@ app.get('/', (req, res) => {
     res.send('KurirTrack API is running');
 });
 
+import userRoutes from './routes/userRoutes';
+import auditRoutes from './routes/auditRoutes';
+
 app.use('/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Global Error Handler (Must be last)
 app.use(errorHandler);

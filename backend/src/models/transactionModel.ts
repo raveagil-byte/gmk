@@ -1,4 +1,5 @@
 import { query } from '../db';
+import { AuditModel } from './auditModel';
 
 export interface Transaction {
     id: string;
@@ -30,7 +31,18 @@ export const TransactionModel = {
        RETURNING *`,
             [courierId, itemCount, PRICE, totalValue, notes]
         );
-        return res.rows[0];
+        const tx = res.rows[0];
+
+        // Audit
+        await AuditModel.create({
+            userId: courierId,
+            action: 'CREATE_TRANSACTION',
+            entityType: 'TRANSACTION',
+            entityId: tx.id,
+            newValues: tx
+        });
+
+        return tx;
     },
 
     async findAll(filters: { courierId?: string; startDate?: string; endDate?: string }) {
@@ -68,6 +80,8 @@ export const TransactionModel = {
     },
 
     async verify(id: string, verifierId: string) {
+        const oldTx = await this.findById(id);
+
         const res = await query(
             `UPDATE transactions 
        SET status = 'VERIFIED', verified_by_id = $2, verified_at = NOW(), updated_at = NOW()
@@ -75,10 +89,24 @@ export const TransactionModel = {
        RETURNING *`,
             [id, verifierId]
         );
-        return res.rows[0];
+        const newTx = res.rows[0];
+
+        // Audit
+        await AuditModel.create({
+            userId: verifierId,
+            action: 'VERIFY_TRANSACTION',
+            entityType: 'TRANSACTION',
+            entityId: id,
+            oldValues: oldTx,
+            newValues: newTx
+        });
+
+        return newTx;
     },
 
-    async softDelete(id: string) {
+    async softDelete(id: string, userId: string) {
+        const oldTx = await this.findById(id);
+
         const res = await query(
             `UPDATE transactions 
        SET deleted_at = NOW() 
@@ -86,6 +114,17 @@ export const TransactionModel = {
        RETURNING *`,
             [id]
         );
+
+        // Audit
+        await AuditModel.create({
+            userId: userId,
+            action: 'DELETE_TRANSACTION',
+            entityType: 'TRANSACTION',
+            entityId: id,
+            oldValues: oldTx,
+            newValues: { deleted_at: 'NOW()' }
+        });
+
         return res.rows[0];
     }
 };

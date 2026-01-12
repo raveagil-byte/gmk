@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../../components/Layout';
 import Dashboard from '../../components/Dashboard';
 import TransactionForm from '../../components/TransactionForm';
-import { transactionService } from '../../services/apiService';
+import { transactionService, userService, auditService } from '../../services/apiService';
 import { Transaction, User, AuditLog, UserRole, TransactionStatus } from '../../types';
 
 export const DashboardPage: React.FC = () => {
@@ -18,6 +18,18 @@ export const DashboardPage: React.FC = () => {
         try {
             const txs = await transactionService.getAll();
             setTransactions(txs);
+
+            // Fetch extra data if Admin
+            if (user?.role === 'ADMIN') {
+                try {
+                    const u = await userService.getAll();
+                    setUsers(u);
+                    const l = await auditService.getAll();
+                    setLogs(l);
+                } catch (err) {
+                    console.error("Failed to fetch admin data", err);
+                }
+            }
         } catch (e) {
             console.error("Failed to fetch data", e);
         }
@@ -25,7 +37,7 @@ export const DashboardPage: React.FC = () => {
 
     useEffect(() => {
         refreshData();
-    }, []);
+    }, [user]);
 
     const handleAddTransaction = async (count: number, notes?: string) => {
         setLoading(true);
@@ -118,8 +130,8 @@ export const DashboardPage: React.FC = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${tx.status === TransactionStatus.VERIFIED
-                                                            ? 'bg-green-50 text-green-600 border-green-100'
-                                                            : 'bg-yellow-50 text-yellow-600 border-yellow-100'
+                                                        ? 'bg-green-50 text-green-600 border-green-100'
+                                                        : 'bg-yellow-50 text-yellow-600 border-yellow-100'
                                                         }`}>
                                                         {tx.status}
                                                     </span>
@@ -168,19 +180,72 @@ export const DashboardPage: React.FC = () => {
 
             {activeTab === 'users' && (
                 <div className="space-y-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Manajemen Mitra (User)</h2>
-                    <div className="bg-orange-50 border border-orange-100 p-4 rounded text-sm text-[#EE4D2D]">
-                        ⚠️ Fitur manajemen user masih dalam pengembangan (Mock Data).
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-800">Manajemen User</h2>
+                            <p className="text-gray-500 text-sm">Daftar pengguna & hak akses aplikasi</p>
+                        </div>
+                        <button className="bg-[#EE4D2D] text-white px-4 py-2 rounded shadow text-sm font-bold opacity-50 cursor-not-allowed">
+                            + Tambah User (Demo)
+                        </button>
                     </div>
-                    {/* Placeholder for Users Grid */}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {users.map(u => (
+                            <div key={u.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white ${u.role === 'ADMIN' ? 'bg-slate-800' : (u.role === 'SUPERVISOR' ? 'bg-blue-600' : 'bg-[#EE4D2D]')
+                                    }`}>
+                                    {u.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-900">{u.name}</h4>
+                                    <p className="text-xs text-gray-500">{u.email}</p>
+                                    <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 mt-1 block">{u.role}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
             {activeTab === 'audit' && (
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-gray-800">Audit Log System</h2>
-                    <div className="bg-gray-50 p-8 rounded text-center text-gray-400 italic">
-                        Log aktivitas akan muncul di sini.
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden text-sm">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th className="px-4 py-3 font-semibold text-gray-600">Time</th>
+                                    <th className="px-4 py-3 font-semibold text-gray-600">User</th>
+                                    <th className="px-4 py-3 font-semibold text-gray-600">Action</th>
+                                    <th className="px-4 py-3 font-semibold text-gray-600">Entity</th>
+                                    <th className="px-4 py-3 font-semibold text-gray-600">Changes</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {logs.map((log: any) => (
+                                    <tr key={log.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                            {new Date(log.createdAt).toLocaleString()}
+                                        </td>
+                                        <td className="px-4 py-3 font-medium text-gray-800">
+                                            {log.userName || log.user_name || 'Unknown'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                                {log.action}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-600">
+                                            {log.entityType} #{log.entityId.slice(0, 5)}
+                                        </td>
+                                        <td className="px-4 py-3 text-xs font-mono text-gray-500 max-w-xs truncate">
+                                            {JSON.stringify(log.newValues || {})}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

@@ -27,5 +27,10 @@ export const UserModel = {
     async findById(id: string): Promise<User | null> {
         const res = await query('SELECT * FROM users WHERE id = $1', [id]);
         return res.rows[0] || null;
+    },
+
+    async findAll(): Promise<User[]> {
+        const res = await query('SELECT id, email, name, role, created_at FROM users ORDER BY created_at DESC');
+        return res.rows;
     }
 };
