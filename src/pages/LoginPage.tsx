@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
     const { login, isLoading } = useAuth();
@@ -57,8 +57,8 @@ export const LoginPage: React.FC = () => {
                         {isLoading ? 'Memuat...' : 'Log In'}
                     </button>
                     <div className="flex justify-between text-xs text-gray-500 mt-4">
-                        <a href="#" className="hover:text-[#EE4D2D]">Lupa Password?</a>
-                        <a href="#" className="hover:text-[#EE4D2D]">Daftar Mitra Baru</a>
+                        <Link to="/forgot-password" className="hover:text-[#EE4D2D]">Lupa Password?</Link>
+                        <Link to="/register" className="hover:text-[#EE4D2D]">Daftar Mitra Baru</Link>
                     </div>
                 </form>
             </div>

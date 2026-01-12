@@ -55,6 +55,16 @@ export const authService = {
         }
     },
 
+    async register(email: string, password: string, name: string) {
+        const res = await api.post('/auth/register', {
+            email,
+            password,
+            name,
+            role: 'COURIER' // Default role
+        });
+        return res.data;
+    },
+
     logout() {
         localStorage.removeItem('token');
     }
